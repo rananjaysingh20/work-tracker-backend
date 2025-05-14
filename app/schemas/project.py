@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import datetime
 from uuid import UUID
@@ -11,6 +11,20 @@ class ProjectBase(BaseModel):
     status: str = "active"
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+
+    @validator('start_date', 'end_date', pre=True)
+    def parse_dates(cls, value):
+        if isinstance(value, str):
+            try:
+                # First try parsing as datetime
+                return datetime.fromisoformat(value)
+            except ValueError:
+                try:
+                    # If that fails, try parsing as date and convert to datetime
+                    return datetime.strptime(value, '%Y-%m-%d')
+                except ValueError:
+                    raise ValueError("Invalid date format. Expected YYYY-MM-DD or ISO datetime format")
+        return value
 
 class ProjectCreate(ProjectBase):
     pass
