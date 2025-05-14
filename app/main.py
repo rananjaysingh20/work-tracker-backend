@@ -13,7 +13,11 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=[
+        "https://webgigs-tracker.web.app",  # Default Firebase domain
+        "https://webgigs-tracker.firebaseapp.com",  # Default Firebase domain
+        "https://webgigs.in"  # Custom domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
