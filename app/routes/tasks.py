@@ -35,20 +35,19 @@ async def create_task(
 ):
     """Create a new task for a project"""
     try:
-        print(f"User: {current_user.id}")
-        print(f"Project ID: {project_id}")
-        print(f"Task payload: {task.dict()}")
         # Check project ownership
         project = await db.get_project(project_id)
-        print(f"Project lookup result: {project}")
         if not project:
-            print("Project not found.")
             raise HTTPException(status_code=404, detail="Project not found")
         if project["user_id"] != str(current_user.id):
-            print("User does not own the project.")
             raise HTTPException(status_code=403, detail="You do not have permission to add tasks to this project.")
-        result = await db.create_task(project_id, task.dict())
-        print(f"Task creation result: {result}")
+        
+        # Convert task to dict and ensure datetime is properly formatted
+        task_data = task.dict()
+        if task_data.get('due_date'):
+            task_data['due_date'] = db.to_serializable(task_data['due_date'])
+            
+        result = await db.create_task(project_id, task_data)
         return result
     except Exception as e:
         import traceback
@@ -95,7 +94,12 @@ async def update_task(
 ):
     """Update a task"""
     try:
-        updated_task = await db.update_task(task_id, task.dict(exclude_unset=True))
+        # Convert task to dict and ensure datetime is properly formatted
+        task_data = task.dict(exclude_unset=True)
+        if task_data.get('due_date'):
+            task_data['due_date'] = db.to_serializable(task_data['due_date'])
+            
+        updated_task = await db.update_task(task_id, task_data)
         if not updated_task:
             raise HTTPException(status_code=404, detail="Task not found")
         return updated_task

@@ -365,16 +365,16 @@ class DatabaseService:
         self.supabase.table("client_files").delete().eq("id", file_id).execute()
 
     def to_serializable(self, data):
+        """Convert data to JSON serializable format"""
         if isinstance(data, dict):
             return {k: self.to_serializable(v) for k, v in data.items()}
         elif isinstance(data, list):
-            return [self.to_serializable(v) for v in data]
-        elif isinstance(data, uuid.UUID):
-            return str(data)
+            return [self.to_serializable(item) for item in data]
         elif isinstance(data, datetime.datetime):
             return data.isoformat()
-        else:
-            return data
+        elif isinstance(data, uuid.UUID):
+            return str(data)
+        return data
 
     async def get_active_tasks_for_projects(self, project_ids: List[str]) -> List[Dict[str, Any]]:
         """Get all active tasks for a list of project IDs"""
