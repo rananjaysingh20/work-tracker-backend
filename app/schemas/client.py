@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from uuid import UUID
 from .base import BaseSchema
+from .project import Project
 
 class ClientBase(BaseModel):
     name: str
@@ -26,4 +27,4 @@ class Client(ClientBase, BaseSchema):
     pass
 
 class ClientWithProjects(Client):
-    projects: List["Project"] = [] 
+    projects: List[Project] = [] 
