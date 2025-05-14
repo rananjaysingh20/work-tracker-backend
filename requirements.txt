@@ -10,3 +10,4 @@ pytest==7.4.3
 pydantic-settings
 email-validator
 storage3
+httpx==0.24.1
