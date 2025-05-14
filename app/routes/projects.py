@@ -5,12 +5,21 @@ from ..schemas.user import User
 from ..services.database import db
 from .auth import get_current_user
 from postgrest.exceptions import APIError
+from datetime import datetime
 
 router = APIRouter()
 
 @router.get("/", response_model=List[Project])
 async def get_projects(current_user: User = Depends(get_current_user)) -> Any:
     projects = await db.get_projects(str(current_user.id))
+    
+    # Ensure datetime fields are returned as datetime objects
+    for project in projects:
+        if 'start_date' in project and isinstance(project['start_date'], str):
+            project['start_date'] = datetime.fromisoformat(project['start_date'])
+        if 'end_date' in project and isinstance(project['end_date'], str):
+            project['end_date'] = datetime.fromisoformat(project['end_date'])
+    
     return projects
 
 @router.post("/", response_model=Project)

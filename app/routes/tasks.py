@@ -5,6 +5,7 @@ from ..services.database import db
 from .auth import get_current_user
 from ..schemas.user import User
 from postgrest.exceptions import APIError
+from datetime import datetime
 
 router = APIRouter(tags=["tasks"])
 
@@ -16,6 +17,12 @@ async def get_project_tasks(
     """Get all tasks for a specific project"""
     try:
         tasks = await db.get_project_tasks(project_id)
+        
+        # Ensure due_date is returned as a datetime object
+        for task in tasks:
+            if 'due_date' in task and isinstance(task['due_date'], str):
+                task['due_date'] = datetime.fromisoformat(task['due_date'])
+        
         return tasks
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -58,7 +65,13 @@ async def get_active_tasks(current_user: User = Depends(get_current_user)):
     if not project_ids:
         return []
     active_tasks = await db.get_active_tasks_for_projects(project_ids)
-    return active_tasks 
+    
+    # Ensure due_date is returned as a datetime object
+    for task in active_tasks:
+        if 'due_date' in task and isinstance(task['due_date'], str):
+            task['due_date'] = datetime.fromisoformat(task['due_date'])
+    
+    return active_tasks
 
 @router.get("/{task_id}", response_model=Task)
 async def get_task(

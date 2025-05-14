@@ -5,7 +5,6 @@ from .auth import get_current_user_and_token
 from ..schemas.user import User
 import uuid
 import datetime
-from storage3.exceptions import StorageApiError
 
 router = APIRouter(tags=["time_entry_files"])
 
@@ -30,8 +29,8 @@ async def upload_time_entry_file(
         res = supabase_storage.storage.from_(BUCKET_NAME).upload(storage_path, content, {"content-type": file.content_type})
         if hasattr(res, 'error') and res.error:
             raise HTTPException(status_code=500, detail=f"Failed to upload file: {res.error.message}")
-    except StorageApiError as e:
-        raise HTTPException(status_code=413, detail=f"{e.message}")
+    except Exception as e:
+        raise HTTPException(status_code=413, detail=str(e))
 
     file_url = f"{supabase_storage.storage_url}/object/public/{BUCKET_NAME}/{storage_path}"
 
