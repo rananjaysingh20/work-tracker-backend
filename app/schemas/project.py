@@ -4,14 +4,7 @@ from datetime import datetime
 from uuid import UUID
 from .base import BaseSchema
 
-class ProjectBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-    client_id: UUID
-    status: str = "active"
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-
+class DateValidatorMixin:
     @validator('start_date', 'end_date', pre=True)
     def parse_dates(cls, value):
         if isinstance(value, str):
@@ -26,10 +19,18 @@ class ProjectBase(BaseModel):
                     raise ValueError("Invalid date format. Expected YYYY-MM-DD or ISO datetime format")
         return value
 
+class ProjectBase(BaseModel, DateValidatorMixin):
+    name: str
+    description: Optional[str] = None
+    client_id: UUID
+    status: str = "active"
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+
 class ProjectCreate(ProjectBase):
     pass
 
-class ProjectUpdate(BaseModel):
+class ProjectUpdate(BaseModel, DateValidatorMixin):
     name: Optional[str] = None
     description: Optional[str] = None
     client_id: Optional[UUID] = None
